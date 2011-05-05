@@ -507,7 +507,7 @@ ConfigStructNode* Loader::parseElement(TiXmlElement* xmlElementNode)
 {
 	ConfigStructNode* returnNode = 0;
 
-	std::string typeOfNode = xmlElementNode->Attribute("type");
+	String typeOfNode = xmlElementNode->Attribute("type");
 	const String nodeName = xmlElementNode->Value();
 
 
@@ -528,9 +528,10 @@ ConfigStructNode* Loader::parseElement(TiXmlElement* xmlElementNode)
 
 		if( typeOfNode == "BOOL" )
 		{
+		  String value = xmlElementNode->Attribute("value");
 			returnNode = new ConfigValueNode<bool>(
 					nodeName,
-					 xmlElementNode->Attribute("value") == "true"
+					value == "true"
 					 ? true : false
 					,guiParams);
 		}
