@@ -235,7 +235,7 @@ Texture2DCube* Loader::loadCubeTexture(
 	//as it's only a temorary buffer
 	void* buffer = 0;
 
-	String pureFileNameWithoutFaceOrExtension = Path( cubeMapFilePath.filename() ).stem();
+	String pureFileNameWithoutFaceOrExtension = Path( cubeMapFilePath.filename() ).stem().string();
 
 	unsigned int dimensions;
 	for(int runner=0;runner<6;runner++)
@@ -243,7 +243,7 @@ Texture2DCube* Loader::loadCubeTexture(
 		Path currentFilePath =
 			Path(cubeMapFilePath.parent_path()) /  //directory
 			//construct file name with face suffix and file extension
-			Path(pureFileNameWithoutFaceOrExtension + suffixes[runner] + cubeMapFilePath.extension())
+			Path(pureFileNameWithoutFaceOrExtension + suffixes[runner] + cubeMapFilePath.extension().string())
 			;
 
 //		String currentFileName = fileName.string();
@@ -464,14 +464,14 @@ void Loader::loadGlobalConfig(Config& config, const Path & pathToGlobalConfigFil
 	TiXmlDocument XMLDoc ("flewnitGlobalConfig");
 
 	try {
-		if(! XMLDoc.LoadFile(pathToGlobalConfigFile.string())
+		if(! XMLDoc.LoadFile(pathToGlobalConfigFile.string().c_str())
 			|| XMLDoc.Error())
 		{
 			throw std::exception();
 		}
 
 		LOG<<INFO_LOG_LEVEL<<"Config file has root node named "<<
-				XMLDoc.RootElement()->ValueStr()<<" ;\n";
+				XMLDoc.RootElement()->Value()<<" ;\n";
 
 
 		//config.rootPtr() = new ConfigStructNode();
@@ -487,7 +487,7 @@ void Loader::loadGlobalConfig(Config& config, const Path & pathToGlobalConfigFil
 			if(childElement)
 			{
 				//returnNode->get(child->ValueStr())= parseElement(childElement);
-				config.root()[child->ValueStr()].push_back( parseElement(childElement) );
+				config.root()[child->Value()].push_back( parseElement(childElement) );
 			}
 		}
 
@@ -507,86 +507,86 @@ ConfigStructNode* Loader::parseElement(TiXmlElement* xmlElementNode)
 {
 	ConfigStructNode* returnNode = 0;
 
-	const String* typeOfNode = xmlElementNode->Attribute(String("type"));
-	const String nodeName = xmlElementNode->ValueStr();
+	std::string typeOfNode = xmlElementNode->Attribute("type");
+	const String nodeName = xmlElementNode->Value();
 
 
-	if(typeOfNode)
+	if(typeOfNode != "")
 	{
 		//ok, this is a "value" node which could be interesting for GUI manipulation:
 		GUIParams guiParams;
 		getGUIParams(xmlElementNode,guiParams);
 
-		if( *typeOfNode == String("STRING") )
+		if( typeOfNode == "STRING" )
 		{
 			returnNode = new ConfigValueNode<String>(
 					nodeName,
 					//dereference String pointer
-					*( xmlElementNode->Attribute(String("value")) )
+					xmlElementNode->Attribute("value")
 					, guiParams);
 		}
 
-		if( *typeOfNode == String("BOOL") )
+		if( typeOfNode == "BOOL" )
 		{
 			returnNode = new ConfigValueNode<bool>(
 					nodeName,
-					 *(xmlElementNode->Attribute(String("value"))) == String("true")
+					 xmlElementNode->Attribute("value") == "true"
 					 ? true : false
 					,guiParams);
 		}
 
-		if( *typeOfNode == String("INT") )
+		if( typeOfNode == "INT" )
 		{
 			returnNode = new ConfigValueNode<int>(
 					nodeName,
-					 boost::lexical_cast<int>( *(xmlElementNode->Attribute( String("value") )) )
+					 boost::lexical_cast<int>( *(xmlElementNode->Attribute( "value" )) )
 					,guiParams);
 		}
 
-		if( *typeOfNode == String("FLOAT") )
+		if( typeOfNode == "FLOAT" )
 		{
 			returnNode = new ConfigValueNode<float>(
 					nodeName,
-					boost::lexical_cast<float>( *(xmlElementNode->Attribute( String("value") )) )
+					boost::lexical_cast<float>( *(xmlElementNode->Attribute( "value" )) )
 					,guiParams);
 		}
 
 
 
 
-		if( *typeOfNode == String("VEC2I") )
+		if( typeOfNode == "VEC2I" )
 		{
 			returnNode = new ConfigValueNode<Vector2Di>(
 					nodeName,
 					Vector2Di(
-							boost::lexical_cast<int>( *(xmlElementNode->Attribute( String("x") )) ),
-							boost::lexical_cast<int>( *(xmlElementNode->Attribute( String("y") )) )
+							boost::lexical_cast<int>( *(xmlElementNode->Attribute("x"))),
+							boost::lexical_cast<int>( *(xmlElementNode->Attribute("y")))
 					)
 					,guiParams);
 		}
 
-		if( *typeOfNode == String("VEC3I") )
+		if( typeOfNode =="VEC3I" )
 		{
 			returnNode = new ConfigValueNode<Vector3Di>(
 					nodeName,
 					Vector3Di(
-							boost::lexical_cast<int>( *(xmlElementNode->Attribute( String("x") )) ),
-							boost::lexical_cast<int>( *(xmlElementNode->Attribute( String("y") )) ),
-							boost::lexical_cast<int>( *(xmlElementNode->Attribute( String("z") )) )
+							boost::lexical_cast<int>( *(xmlElementNode->Attribute("x"))),
+							boost::lexical_cast<int>( *(xmlElementNode->Attribute("y"))),
+							boost::lexical_cast<int>( *(xmlElementNode->Attribute("z")))
 					)
 					,guiParams);
 		}
 
 
-		if( *typeOfNode == String("VEC4I") )
+		if( typeOfNode =="VEC4I" )
 		{
 			returnNode = new ConfigValueNode<Vector4Di>(
 					nodeName,
 					Vector4Di(
-							boost::lexical_cast<int>( *(xmlElementNode->Attribute( String("x") )) ),
-							boost::lexical_cast<int>( *(xmlElementNode->Attribute( String("y") )) ),
-							boost::lexical_cast<int>( *(xmlElementNode->Attribute( String("z") )) ),
-							boost::lexical_cast<int>( *(xmlElementNode->Attribute( String("w") )) )
+							boost::lexical_cast<int>( *(xmlElementNode->Attribute("x"))),
+							boost::lexical_cast<int>( *(xmlElementNode->Attribute("y"))),
+							boost::lexical_cast<int>( *(xmlElementNode->Attribute("z"))),
+							boost::lexical_cast<int>( *(xmlElementNode->Attribute("w")))
 					)
 					,guiParams);
 		}
@@ -594,39 +594,39 @@ ConfigStructNode* Loader::parseElement(TiXmlElement* xmlElementNode)
 
 
 
-		if( *typeOfNode == String("VEC2") )
+		if( typeOfNode =="VEC2" )
 		{
 			returnNode = new ConfigValueNode<Vector2D>(
 					nodeName,
 					Vector2D(
-							boost::lexical_cast<float>( *(xmlElementNode->Attribute( String("x") )) ),
-							boost::lexical_cast<float>( *(xmlElementNode->Attribute( String("y") )) )
+							boost::lexical_cast<float>( *(xmlElementNode->Attribute("x"))),
+							boost::lexical_cast<float>( *(xmlElementNode->Attribute("y")))
 					)
 					,guiParams);
 		}
 
-		if( *typeOfNode == String("VEC3") )
+		if( typeOfNode =="VEC3" )
 		{
 			returnNode = new ConfigValueNode<Vector3D>(
 					nodeName,
 					Vector3D(
-							boost::lexical_cast<float>( *(xmlElementNode->Attribute( String("x") )) ),
-							boost::lexical_cast<float>( *(xmlElementNode->Attribute( String("y") )) ),
-							boost::lexical_cast<float>( *(xmlElementNode->Attribute( String("z") )) )
+							boost::lexical_cast<float>( *(xmlElementNode->Attribute("x"))),
+							boost::lexical_cast<float>( *(xmlElementNode->Attribute("y"))),
+							boost::lexical_cast<float>( *(xmlElementNode->Attribute("z")))
 					)
 					,guiParams);
 		}
 
 
-		if( *typeOfNode == String("VEC4") )
+		if( typeOfNode =="VEC4" )
 		{
 			returnNode = new ConfigValueNode<Vector4D>(
 					nodeName,
 					Vector4D(
-							boost::lexical_cast<float>( *(xmlElementNode->Attribute( String("x") )) ),
-							boost::lexical_cast<float>( *(xmlElementNode->Attribute( String("y") )) ),
-							boost::lexical_cast<float>( *(xmlElementNode->Attribute( String("z") )) ),
-							boost::lexical_cast<float>( *(xmlElementNode->Attribute( String("w") )) )
+							boost::lexical_cast<float>( *(xmlElementNode->Attribute("x"))),
+							boost::lexical_cast<float>( *(xmlElementNode->Attribute("y"))),
+							boost::lexical_cast<float>( *(xmlElementNode->Attribute("z"))),
+							boost::lexical_cast<float>( *(xmlElementNode->Attribute("w")))
 					)
 					,guiParams);
 		}
@@ -635,7 +635,7 @@ ConfigStructNode* Loader::parseElement(TiXmlElement* xmlElementNode)
 		if(! returnNode)
 		{
 			LOG<<ERROR_LOG_LEVEL<<"Loader::parseElement: unknown \"type\" string in XML config element: "<<
-					(*typeOfNode) <<";\n";
+					typeOfNode <<";\n";
 
 		}
 	}
@@ -653,7 +653,7 @@ ConfigStructNode* Loader::parseElement(TiXmlElement* xmlElementNode)
 		TiXmlElement* childElement = child->ToElement();
 		if(childElement)
 		{
-			(*returnNode) [ child->ValueStr() ] . push_back( parseElement(childElement) );
+			(*returnNode) [ child->Value() ] . push_back( parseElement(childElement) );
 		}
 	}
 
@@ -663,38 +663,38 @@ ConfigStructNode* Loader::parseElement(TiXmlElement* xmlElementNode)
 
 void Loader::getGUIParams(TiXmlElement* xmlElementNode, GUIParams& guiParams)
 {
-	const String* guiVisibilityOfNode = xmlElementNode->Attribute(String("GUIVisibility"));
+	const String guiVisibilityOfNode = xmlElementNode->Attribute("GUIVisibility");
 
-	if(guiVisibilityOfNode)
+	if(guiVisibilityOfNode != "")
 	{
-		if(*(guiVisibilityOfNode) == String("read"))
+		if(guiVisibilityOfNode =="read")
 		{
 			guiParams.setGUIVisibility( ACCESS_READ );
 		}
 		else
 		{
-			if(*(guiVisibilityOfNode) == String("read/write"))
+			if(guiVisibilityOfNode =="read/write")
 			{
 				guiParams.setGUIVisibility( ACCESS_READWRITE );
 			}
 			else
 			{
-				if(*(guiVisibilityOfNode) == String("none"))
+				if(guiVisibilityOfNode =="none")
 				{
 					guiParams.setGUIVisibility( ACCESS_NONE );
 				}
 				else
 				{
-					LOG<<ERROR_LOG_LEVEL<<"GUIVisibility String \""<< *guiVisibilityOfNode << "\" invalid; \n";
+					LOG<<ERROR_LOG_LEVEL<<"GUIVisibility String \""<< guiVisibilityOfNode << "\" invalid; \n";
 				}
 			}
 		}
 
 		//get the tweakConfigString
-		const String* tweakConfigString = xmlElementNode->Attribute(String("tweakConfigString"));
-		if(tweakConfigString)
+		const String tweakConfigString = xmlElementNode->Attribute("tweakConfigString");
+		if(tweakConfigString != "")
 		{
-			guiParams.setGUIPropertyString(*tweakConfigString);
+			guiParams.setGUIPropertyString(tweakConfigString);
 		}
 	}
 	//else do nothing, as the defaul constructor of GUIParams allready has initialized its values;
