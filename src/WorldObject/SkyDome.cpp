@@ -19,10 +19,10 @@
 namespace Flewnit {
 
 SkyDome::SkyDome( Path cubeMapFilePath )//Path cubeMapDirectory, String cubeMapFilename, String fileEnding)
-: PureVisualObject(String("SkyDome") + Path(cubeMapFilePath.filename()).stem())
+: PureVisualObject(String("SkyDome") + Path(cubeMapFilePath.filename()).stem().c_str())
 {
 	BoxGeometry* boxGeo= new BoxGeometry(getName(),Vector3D(50,50,50),false,false);
-	String cubeMapFilename = Path(cubeMapFilePath.filename()).stem();
+	String cubeMapFilename = Path(cubeMapFilePath.filename()).stem().c_str();
 	Texture2DCube* cubeTex = dynamic_cast<Texture2DCube*>(
 			SimulationResourceManager::getInstance().getTexture(cubeMapFilename));
 	if(!cubeTex)
